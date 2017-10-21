@@ -26,6 +26,7 @@ struct ActiveBuilder {
     static func createURLElements(from text: String, range: NSRange, maximumLenght: Int?) -> ([ElementTuple], String) {
         let type = ActiveType.url
         var text = text
+        var helpText = text
         let matches = RegexParser.getElements(from: text, with: type.pattern, range: range)
         let nsstring = text as NSString
         var elements: [ElementTuple] = []
@@ -34,17 +35,22 @@ struct ActiveBuilder {
             let word = nsstring.substring(with: match.range)
                 .trimmingCharacters(in: CharacterSet.whitespacesAndNewlines)
 
-            guard let maxLenght = maximumLenght, word.characters.count > maxLenght else {
-                let range = maximumLenght == nil ? match.range : (text as NSString).range(of: word)
-                let element = ActiveElement.create(with: type, text: word)
-                elements.append((range, element, type))
-                continue
-            }
+//            guard let maxLenght = maximumLenght, word.characters.count > maxLenght else {
+//                let range = maximumLenght == nil ? match.range : (text as NSString).range(of: word)
+//                let element = ActiveElement.create(with: type, text: word)
+//                elements.append((range, element, type))
+//                continue
+//            }
+//
+//            let trimmedWord = word.trim(to: maxLenght)
+            let trimmedWord = "Э网页链接"
+            
+            helpText = helpText.replacingOccurrences(of: trimmedWord, with: "Э啦啦啦啦")
+            helpText = helpText.replacingOccurrences(of: word, with: trimmedWord)
+            let newRange = (helpText as NSString).range(of: trimmedWord)
 
-            let trimmedWord = word.trim(to: maxLenght)
             text = text.replacingOccurrences(of: word, with: trimmedWord)
 
-            let newRange = (text as NSString).range(of: trimmedWord)
             let element = ActiveElement.url(original: word, trimmed: trimmedWord)
             elements.append((newRange, element, type))
         }
