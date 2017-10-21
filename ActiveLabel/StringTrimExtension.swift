@@ -9,13 +9,17 @@
 import Foundation
 
 extension String {
-
+    
     func trim(to maximumCharacters: Int) -> String {
-        return "\(self[..<index(startIndex, offsetBy: maximumCharacters)])" + "..."
+        return substring(to: index(startIndex, offsetBy: maximumCharacters)) + "..."
     }
 }
 
-
+extension String {
+    func attributonString() -> NSMutableAttributedString {
+        return NSMutableAttributedString(string: self)
+    }
+}
 
 extension NSMutableAttributedString {
     
@@ -28,18 +32,20 @@ extension NSMutableAttributedString {
         //        let normalString = self
         let payAttri = NSMutableAttributedString(string: payPlaceholder)
         let range = NSRange(location: 0, length: payAttri.length)
-        // 1.将 self 原有的 attributes 添加给
+        // 1.将 self 原有的 attributes 添加给 attributeString
         let oldAttributes = self.attributes(at: 0, effectiveRange: nil)
+        //        attributeString.addAttributes(oldAttributes, range: NSRange(location: 0, length: attributeString.length))
         payAttri.addAttributes(oldAttributes, range: range)
         // 2.将需要付费的范围进行模糊
+        //        let blurRange = NSRange(location: normalString.length, length: attributeString.length - normalString.length)
         let shadow = NSShadow()
         shadow.shadowColor = UIColor.black
         shadow.shadowBlurRadius = 6
-        payAttri.addAttributes([NSAttributedStringKey.shadow: shadow, NSAttributedStringKey.strokeWidth: 1, NSAttributedStringKey.strokeColor: UIColor.white], range:range)
+        //        attributeString.addAttributes([NSShadowAttributeName: shadow, NSStrokeWidthAttributeName: 1, NSStrokeColorAttributeName: UIColor.white], range:blurRange)
+        payAttri.addAttributes([NSShadowAttributeName: shadow, NSStrokeWidthAttributeName: 1, NSStrokeColorAttributeName: UIColor.white], range:range)
         
         let attributeString = self
         attributeString.append(payAttri)
         return attributeString
     }
 }
-
