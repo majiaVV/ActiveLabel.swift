@@ -18,6 +18,13 @@ typealias ElementTuple = (range: NSRange, element: ActiveElement, type: ActiveTy
 
 @IBDesignable open class ActiveLabel: UILabel {
     
+    // 是否显示付费文字
+    open var shouldAddFuzzyString = false {
+        didSet {
+            updateTextStorage(parseText: false)
+        }
+    }
+
     // MARK: - public properties
     open weak var delegate: ActiveLabelDelegate?
 
@@ -271,7 +278,7 @@ typealias ElementTuple = (range: NSRange, element: ActiveElement, type: ActiveTy
             return
         }
 
-        let mutAttrString = addLineBreak(attributedText)
+        var mutAttrString = addLineBreak(attributedText)
 
         if parseText {
             clearActiveElements()
@@ -279,6 +286,9 @@ typealias ElementTuple = (range: NSRange, element: ActiveElement, type: ActiveTy
             mutAttrString.mutableString.setString(newString)
         }
 
+        if shouldAddFuzzyString {
+            mutAttrString = mutAttrString.addFuzzyString()
+        }
         addLinkAttribute(mutAttrString)
         textStorage.setAttributedString(mutAttrString)
         _customizing = true
