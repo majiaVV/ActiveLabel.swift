@@ -36,18 +36,9 @@ struct ActiveBuilder {
         for match in matches where match.range.length > 2 {
             let word = nsstring.substring(with: match.range)
                 .trimmingCharacters(in: CharacterSet.whitespacesAndNewlines)
-            
-            //            guard let maxLenght = maximumLenght, word.characters.count > maxLenght else {
-            //                let range = maximumLenght == nil ? match.range : (text as NSString).range(of: word)
-            //                let element = ActiveElement.create(with: type, text: word)
-            //                elements.append((range, element, type))
-            //                continue
-            //            }
-            
-            //            let trimmedWord = word.trim(to: maxLenght)
-            let trimmedWord = "Э网页链接"
-            
-            helpText = helpText.replacingOccurrences(of: trimmedWord, with: "Э啦啦啦啦")
+
+            let trimmedWord = "网页链接"
+            helpText = helpText.replacingOccurrences(of: trimmedWord, with: "啦啦啦啦")
             helpText = helpText.replacingOccurrences(of: word, with: trimmedWord)
             let newRange = (helpText as NSString).range(of: trimmedWord)
             
