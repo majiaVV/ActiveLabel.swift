@@ -525,7 +525,7 @@ typealias ElementTuple = (range: NSRange, element: ActiveElement, type: ActiveTy
     
     // 点击了 url
     fileprivate func didTapStringURL(_ stringURL: String) {
-        guard let urlHandler = urlTapHandler, let url = URL(string: stringURL) else {
+        guard let urlHandler = urlTapHandler, let urlString = stringURL.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed), let url = URL(string: urlString) else {
             delegate?.didSelect(stringURL, type: .url)
             return
         }
