@@ -26,27 +26,34 @@ struct ActiveBuilder {
     // 创建 url 事件
     static func createURLElements(from text: String, range: NSRange, maximumLenght: Int?) -> ([ElementTuple], String) {
         let type = ActiveType.url
-        var text = text
-        var helpText = text
+        var text = text // 原 string
         // 用正则检查是否有 url
         let matches = RegexParser.getElements(from: text, with: type.pattern, range: range)
         let nsstring = text as NSString
         var elements: [ElementTuple] = []
-        
-        for match in matches where match.range.length > 2 {
-            let word = nsstring.substring(with: match.range)
-                .trimmingCharacters(in: CharacterSet.whitespacesAndNewlines)
 
-            let trimmedWord = "网页链接"
-            helpText = helpText.replacingOccurrences(of: trimmedWord, with: "啦啦啦啦")
-            helpText = helpText.replacingOccurrences(of: word, with: trimmedWord)
-            let newRange = (helpText as NSString).range(of: trimmedWord)
-            
-            text = text.replacingOccurrences(of: word, with: trimmedWord)
-            
-            print("newRange", newRange)
-            let element = ActiveElement.url(original: word, trimmed: trimmedWord)
+        var matchInfos: [(String, NSRange)] = []
+        for match in matches where match.range.length > 2 {
+            // url 字段
+            let webString = nsstring.substring(with: match.range).trimmingCharacters(in: CharacterSet.whitespacesAndNewlines)
+            matchInfos.append((webString, match.range))
+        }
+        
+        let trimmedWord = "网页链接"
+        var oldRecord = 0
+        var newRecord = 0
+        for (webString, webRange) in matchInfos {
+            // 计算 range
+            let newRangeLocation = webRange.location - oldRecord + newRecord
+            let newRangeLenth = (trimmedWord as NSString).length
+            let newRange = NSRange(location: newRangeLocation, length: newRangeLenth)
+            oldRecord += (webString as NSString).length
+            newRecord += newRangeLenth
+            // 设置 element
+            let element = ActiveElement.url(original: webString, trimmed: trimmedWord)
+            text = text.replacingOccurrences(of: webString, with: trimmedWord)
             elements.append((newRange, element, type))
+            
         }
         return (elements, text)
     }
