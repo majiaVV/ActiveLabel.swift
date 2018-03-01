@@ -39,7 +39,7 @@ struct ActiveBuilder {
             matchInfos.append((webString, match.range))
         }
         
-        let trimmedWord = "网页链接"
+        let trimmedWord = "查看全文"
         var oldRecord = 0
         var newRecord = 0
         for (webString, webRange) in matchInfos {

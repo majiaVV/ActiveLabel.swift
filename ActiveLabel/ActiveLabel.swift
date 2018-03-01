@@ -48,7 +48,7 @@ typealias ElementTuple = (range: NSRange, element: ActiveElement, type: ActiveTy
     @IBInspectable open var hashtagSelectedColor: UIColor? {
         didSet { updateTextStorage(parseText: false) }
     }
-    @IBInspectable open var URLColor: UIColor = UIColor(hex: 0x59b6d7) {
+    @IBInspectable open var URLColor: UIColor = UIColor(hex: 0xf3bb4d) {
         didSet { updateTextStorage(parseText: false) }
     }
     @IBInspectable open var URLSelectedColor: UIColor? {
