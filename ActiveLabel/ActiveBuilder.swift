@@ -16,11 +16,12 @@ struct ActiveBuilder {
         switch type {
         case .mention, .hashtag:
             return createElementsIgnoringFirstCharacter(from: text, for: type, range: range, filterPredicate: filterPredicate)
-        case .url:
+        case .url, .lookMore:
             return createElements(from: text, for: type, range: range, filterPredicate: filterPredicate)
         case .custom:
             return createElements(from: text, for: type, range: range, minLength: 1, filterPredicate: filterPredicate)
         }
+        
     }
     
     // 创建 url 事件
@@ -40,6 +41,41 @@ struct ActiveBuilder {
         }
         
         let trimmedWord = "网页链接"
+        var oldRecord = 0
+        var newRecord = 0
+        for (webString, webRange) in matchInfos {
+            // 计算 range
+            let newRangeLocation = webRange.location - oldRecord + newRecord
+            let newRangeLenth = (trimmedWord as NSString).length
+            let newRange = NSRange(location: newRangeLocation, length: newRangeLenth)
+            oldRecord += (webString as NSString).length
+            newRecord += newRangeLenth
+            // 设置 element
+            let element = ActiveElement.url(original: webString, trimmed: trimmedWord)
+            text = text.replacingOccurrences(of: webString, with: trimmedWord)
+            elements.append((newRange, element, type))
+            
+        }
+        return (elements, text)
+    }
+    
+    // 创建 url 事件
+    static func createLookMoreElements(from text: String, range: NSRange, maximumLenght: Int?) -> ([ElementTuple], String) {
+        let type = ActiveType.lookMore
+        var text = text // 原 string
+        // 用正则检查是否有 url
+        let matches = RegexParser.getElements(from: text, with: type.pattern, range: range)
+        let nsstring = text as NSString
+        var elements: [ElementTuple] = []
+        
+        var matchInfos: [(String, NSRange)] = []
+        for match in matches where match.range.length > 2 {
+            // url 字段
+            let webString = nsstring.substring(with: match.range).trimmingCharacters(in: CharacterSet.whitespacesAndNewlines)
+            matchInfos.append((webString, match.range))
+        }
+        
+        let trimmedWord = "「查看更多」"
         var oldRecord = 0
         var newRecord = 0
         for (webString, webRange) in matchInfos {

@@ -29,7 +29,7 @@ typealias ElementTuple = (range: NSRange, element: ActiveElement, type: ActiveTy
     }
     
     // 可用的事件类型
-    open var enabledTypes: [ActiveType] = [.mention, .hashtag, .url]
+    open var enabledTypes: [ActiveType] = [.mention, .hashtag, .url, .lookMore]
     
     // url 最长长度
     open var urlMaximumLength: Int?
@@ -92,6 +92,10 @@ typealias ElementTuple = (range: NSRange, element: ActiveElement, type: ActiveTy
         urlTapHandler = handler
     }
     
+    open func handleLookMoreTap(_ handler: @escaping (String) -> ()) {
+        lookMoreTapHandler = handler
+    }
+    
     open func handleCustomTap(for type: ActiveType, handler: @escaping (String) -> ()) {
         customTapHandlers[type] = handler
     }
@@ -104,6 +108,8 @@ typealias ElementTuple = (range: NSRange, element: ActiveElement, type: ActiveTy
             mentionTapHandler = nil
         case .url:
             urlTapHandler = nil
+        case .lookMore:
+            lookMoreTapHandler = nil
         case .custom:
             customTapHandlers[type] = nil
         }
@@ -174,6 +180,8 @@ typealias ElementTuple = (range: NSRange, element: ActiveElement, type: ActiveTy
         
         layoutManager.drawBackground(forGlyphRange: range, at: newOrigin)
         layoutManager.drawGlyphs(forGlyphRange: range, at: newOrigin)
+//        let actualRect = self.textRect(forBounds: rect, limitedToNumberOfLines: self.numberOfLines)
+//        super.drawText(in: actualRect)
     }
     
     
@@ -227,6 +235,7 @@ typealias ElementTuple = (range: NSRange, element: ActiveElement, type: ActiveTy
             case .mention(let userHandle): didTapMention(userHandle)
             case .hashtag(let hashtag): didTapHashtag(hashtag)
             case .url(let originalURL, _): didTapStringURL(originalURL)
+            case .lookMore(let lookMoretag, _): didTapLookMoretag(lookMoretag)
             case .custom(let element): didTap(element, for: selectedElement.type)
             }
             
@@ -252,6 +261,7 @@ typealias ElementTuple = (range: NSRange, element: ActiveElement, type: ActiveTy
     
     internal var mentionTapHandler: ((String) -> ())?
     internal var hashtagTapHandler: ((String) -> ())?
+    internal var lookMoreTapHandler: ((String) -> ())?
     internal var urlTapHandler: ((URL) -> ())?
     internal var customTapHandlers: [ActiveType : ((String) -> ())] = [:]
     
@@ -332,7 +342,23 @@ typealias ElementTuple = (range: NSRange, element: ActiveElement, type: ActiveTy
         attributes[NSFontAttributeName] = font!
         attributes[NSForegroundColorAttributeName] = textColor
         mutAttrString.addAttributes(attributes, range: range)
-        
+        let paragraphStyle = NSMutableParagraphStyle()
+        paragraphStyle.lineBreakMode = NSLineBreakMode.byWordWrapping
+        if textAlignment != nil {
+            paragraphStyle.alignment = textAlignment
+        } else {
+            paragraphStyle.alignment = .left
+        }
+        if self.lineSpacing > 0 {
+            paragraphStyle.lineSpacing = self.lineSpacing
+            paragraphStyle.paragraphSpacing = self.lineSpacing / 2.0
+        } else {
+            paragraphStyle.lineSpacing = 6
+            paragraphStyle.paragraphSpacing = 3
+        }
+        paragraphStyle.headIndent = 0.0001
+        paragraphStyle.tailIndent = -0.0001
+        attributes[NSParagraphStyleAttributeName] = paragraphStyle
         attributes[NSForegroundColorAttributeName] = mentionColor
         
         for (type, elements) in activeElements {
@@ -341,6 +367,7 @@ typealias ElementTuple = (range: NSRange, element: ActiveElement, type: ActiveTy
             case .mention: attributes[NSForegroundColorAttributeName] = mentionColor
             case .hashtag: attributes[NSForegroundColorAttributeName] = hashtagColor
             case .url: attributes[NSForegroundColorAttributeName] = URLColor
+            case .lookMore: attributes[NSForegroundColorAttributeName] = URLColor
             case .custom: attributes[NSForegroundColorAttributeName] = customColor[type] ?? defaultCustomColor
             }
             
@@ -376,6 +403,17 @@ typealias ElementTuple = (range: NSRange, element: ActiveElement, type: ActiveTy
             activeElements[.url] = urlElements
         }
         
+        if enabledTypes.contains(.lookMore) {
+            // 创建 查看更多 的响应事件
+            let tuple = ActiveBuilder.createLookMoreElements(from: textString, range: textRange, maximumLenght: urlMaximumLength)
+            let urlElements = tuple.0
+            let finalText = tuple.1
+            textString = finalText
+            textLength = textString.utf16.count
+            textRange = NSRange(location: 0, length: textLength)
+            activeElements[.lookMore] = urlElements
+        }
+        
         for type in enabledTypes where type != .url {
             var filter: ((String) -> Bool)? = nil
             if type == .mention {
@@ -401,9 +439,21 @@ typealias ElementTuple = (range: NSRange, element: ActiveElement, type: ActiveTy
         
         let paragraphStyle = attributes[NSParagraphStyleAttributeName] as? NSMutableParagraphStyle ?? NSMutableParagraphStyle()
         paragraphStyle.lineBreakMode = NSLineBreakMode.byWordWrapping
-        paragraphStyle.alignment = textAlignment
-        paragraphStyle.lineSpacing = lineSpacing
-        paragraphStyle.minimumLineHeight = minimumLineHeight > 0 ? minimumLineHeight: self.font.pointSize * 1.14
+        if textAlignment != nil {
+            paragraphStyle.alignment = textAlignment
+        } else {
+            paragraphStyle.alignment = .left
+        }
+        if self.lineSpacing > 0 {
+            paragraphStyle.lineSpacing = self.lineSpacing
+            paragraphStyle.paragraphSpacing = self.lineSpacing / 2.0
+        } else {
+            paragraphStyle.lineSpacing = 6
+            paragraphStyle.paragraphSpacing = 3
+        }
+        paragraphStyle.headIndent = 0.001
+        paragraphStyle.tailIndent = -0.001
+//        paragraphStyle.minimumLineHeight = minimumLineHeight > 0 ? minimumLineHeight: self.font.pointSize * 1.14
         attributes[NSParagraphStyleAttributeName] = paragraphStyle
         mutAttrString.setAttributes(attributes, range: range)
         
@@ -425,6 +475,7 @@ typealias ElementTuple = (range: NSRange, element: ActiveElement, type: ActiveTy
             case .mention: selectedColor = mentionSelectedColor ?? mentionColor
             case .hashtag: selectedColor = hashtagSelectedColor ?? hashtagColor
             case .url: selectedColor = URLSelectedColor ?? URLColor
+            case .lookMore: selectedColor = URLSelectedColor ?? URLColor
             case .custom:
                 let possibleSelectedColor = customSelectedColor[selectedElement.type] ?? customColor[selectedElement.type]
                 selectedColor = possibleSelectedColor ?? defaultCustomColor
@@ -436,11 +487,28 @@ typealias ElementTuple = (range: NSRange, element: ActiveElement, type: ActiveTy
             case .mention: unselectedColor = mentionColor
             case .hashtag: unselectedColor = hashtagColor
             case .url: unselectedColor = URLColor
+            case .lookMore: unselectedColor = URLColor
             case .custom: unselectedColor = customColor[selectedElement.type] ?? defaultCustomColor
             }
             attributes[NSForegroundColorAttributeName] = unselectedColor
         }
-        
+        let paragraphStyle = NSMutableParagraphStyle()
+        paragraphStyle.lineBreakMode = NSLineBreakMode.byWordWrapping
+        if textAlignment != nil {
+            paragraphStyle.alignment = textAlignment
+        } else {
+            paragraphStyle.alignment = .left
+        }
+        if self.lineSpacing > 0 {
+            paragraphStyle.lineSpacing = self.lineSpacing
+            paragraphStyle.paragraphSpacing = self.lineSpacing / 2.0
+        } else {
+            paragraphStyle.lineSpacing = 6
+            paragraphStyle.paragraphSpacing = 3
+        }
+        paragraphStyle.headIndent = 0.0001
+        paragraphStyle.tailIndent = -0.0001
+        attributes[NSParagraphStyleAttributeName] = paragraphStyle
         if let highlightFont = hightlightFont {
             attributes[NSFontAttributeName] = highlightFont
         }
@@ -523,6 +591,15 @@ typealias ElementTuple = (range: NSRange, element: ActiveElement, type: ActiveTy
         hashtagHandler(hashtag)
     }
     
+    // 点击了 #
+    fileprivate func didTapLookMoretag(_ lookMoretag: String) {
+        guard let lookMoretagHandler = lookMoreTapHandler else {
+            delegate?.didSelect(lookMoretag, type: .lookMore)
+            return
+        }
+        lookMoretagHandler(lookMoretag)
+    }
+    
     // 点击了 url
     fileprivate func didTapStringURL(_ stringURL: String) {
         guard let urlHandler = urlTapHandler, let urlString = stringURL.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed), let url = URL(string: urlString) else {
@@ -538,6 +615,12 @@ typealias ElementTuple = (range: NSRange, element: ActiveElement, type: ActiveTy
             return
         }
         elementHandler(element)
+    }
+    
+    override open func textRect(forBounds bounds: CGRect, limitedToNumberOfLines numberOfLines: Int) -> CGRect {
+        var textRect = super.textRect(forBounds: bounds, limitedToNumberOfLines: numberOfLines)
+        textRect.origin.y = bounds.origin.y
+        return textRect
     }
 }
 
