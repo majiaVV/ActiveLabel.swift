@@ -42,8 +42,16 @@ extension NSMutableAttributedString {
         shadow.shadowColor = UIColor.black
         shadow.shadowBlurRadius = 6
         //        attributeString.addAttributes([NSShadowAttributeName: shadow, NSStrokeWidthAttributeName: 1, NSStrokeColorAttributeName: UIColor.white], range:blurRange)
-        payAttri.addAttributes([NSShadowAttributeName: shadow, NSStrokeWidthAttributeName: 1, NSStrokeColorAttributeName: UIColor.white], range:range)
         
+        /**下面的 paragraphStyle 应该不会影响效果。暂时注释掉
+        let paragraphStyle = NSMutableParagraphStyle()
+        paragraphStyle.lineSpacing = 6
+        paragraphStyle.paragraphSpacing = 3
+        paragraphStyle.headIndent = 0.0001
+        paragraphStyle.tailIndent = -0.0001
+        payAttri.addAttributes([NSShadowAttributeName: shadow, NSStrokeWidthAttributeName: 1, NSStrokeColorAttributeName: UIColor.white, NSParagraphStyleAttributeName: paragraphStyle], range:range)
+        */
+        payAttri.addAttributes([NSShadowAttributeName: shadow, NSStrokeWidthAttributeName: 1, NSStrokeColorAttributeName: UIColor.white], range:range)
         let attributeString = self
         attributeString.append(payAttri)
         return attributeString
