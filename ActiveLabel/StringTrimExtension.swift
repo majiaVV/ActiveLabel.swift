@@ -28,7 +28,7 @@ extension NSMutableAttributedString {
     /// - Returns: 文字
     func addFuzzyString() -> NSMutableAttributedString {
         // 1.设置占位文字
-        let payPlaceholder = "年轻人记得充钱哦你以为你不充钱还能获得力量么年轻人记得充钱哦你以为你不充钱还能获得力量么充钱充钱充钱充钱充钱充钱充钱充钱充钱，充钱年轻人记得充钱哦你以为你不充钱还能获得力量么年轻人记得充钱哦你以为你不充钱还能获得力量么充钱充钱充钱充钱充钱充钱充钱充钱充钱充钱"
+        let payPlaceholder = "智士软件通过Sociax社会化平台，致力于成为企业2.0及社会化软件领域的领导者。我们的项目始于 2008年，由一群80后的创业团队，基于国内外先进的SNS及Web2.0技术理念，以Think工作室的形式，首先推出开源社区平台 --ThinkSNS，并在个人、企业和非营利组织中快速传播，队伍不断壮大。"
         //        let normalString = self
         let payAttri = NSMutableAttributedString(string: payPlaceholder)
         let range = NSRange(location: 0, length: payAttri.length)
