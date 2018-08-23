@@ -36,7 +36,7 @@ typealias ElementTuple = (range: NSRange, element: ActiveElement, type: ActiveTy
     // 自定义
     open var configureLinkAttribute: ConfigureLinkAttribute?
     
-    @IBInspectable open var mentionColor: UIColor = .blue {
+    @IBInspectable open var mentionColor: UIColor = UIColor(red: 89, green: 182, blue: 215) {
         didSet { updateTextStorage(parseText: false) }
     }
     @IBInspectable open var mentionSelectedColor: UIColor? {
