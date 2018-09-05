@@ -124,6 +124,12 @@ typealias ElementTuple = (range: NSRange, element: ActiveElement, type: ActiveTy
         hashtagFilterPredicate = predicate
         updateTextStorage()
     }
+    /// TS+ 补丁方法
+    /// 调用attributedText-->updateTextStorage --> parseTextAndExtractActiveElements 把设置的Attributes设置无效，所以需要重新配置
+    open func fixAddAttributes(_ attrs: [NSAttributedStringKey : Any] = [:], range: NSRange) {
+        textStorage.addAttributes(attrs as [String : Any], range: range)
+        setNeedsDisplay()
+    }
     
     // MARK: - override UILabel properties
     override open var text: String? {
