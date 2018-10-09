@@ -29,7 +29,7 @@ typealias ElementTuple = (range: NSRange, element: ActiveElement, type: ActiveTy
     }
     
     // 可用的事件类型
-    open var enabledTypes: [ActiveType] = [.mention, .hashtag, .url, .lookMore]
+    open var enabledTypes: [ActiveType] = [.mention, .url, .lookMore]
     
     // url 最长长度
     open var urlMaximumLength: Int?
