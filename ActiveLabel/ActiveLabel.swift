@@ -29,14 +29,14 @@ typealias ElementTuple = (range: NSRange, element: ActiveElement, type: ActiveTy
     }
     
     // 可用的事件类型
-    open var enabledTypes: [ActiveType] = [.mention, .hashtag, .url, .lookMore]
+    open var enabledTypes: [ActiveType] = [.mention, .url, .lookMore]
     
     // url 最长长度
     open var urlMaximumLength: Int?
     // 自定义
     open var configureLinkAttribute: ConfigureLinkAttribute?
     
-    @IBInspectable open var mentionColor: UIColor = .blue {
+    @IBInspectable open var mentionColor: UIColor = UIColor(red: 89, green: 182, blue: 215) {
         didSet { updateTextStorage(parseText: false) }
     }
     @IBInspectable open var mentionSelectedColor: UIColor? {
@@ -123,6 +123,12 @@ typealias ElementTuple = (range: NSRange, element: ActiveElement, type: ActiveTy
     open func filterHashtag(_ predicate: @escaping (String) -> Bool) {
         hashtagFilterPredicate = predicate
         updateTextStorage()
+    }
+    /// TS+ 补丁方法
+    /// 调用attributedText-->updateTextStorage --> parseTextAndExtractActiveElements 把设置的Attributes设置无效，所以需要重新配置
+    open func fixAddAttributes(_ attrs: [NSAttributedStringKey : Any] = [:], range: NSRange) {
+        textStorage.addAttributes(attrs as [String : Any], range: range)
+        setNeedsDisplay()
     }
     
     // MARK: - override UILabel properties
