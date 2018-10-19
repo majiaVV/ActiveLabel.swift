@@ -75,7 +75,7 @@ struct ActiveBuilder {
             matchInfos.append((webString, match.range))
         }
         
-        let trimmedWord = "阅读全文  "
+        let trimmedWord = "阅读全文    "
         var oldRecord = 0
         var newRecord = 0
         for (webString, webRange) in matchInfos {

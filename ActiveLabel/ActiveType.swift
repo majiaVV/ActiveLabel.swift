@@ -38,7 +38,7 @@ public enum ActiveType {
         case .mention: return RegexParser.mentionPattern
         case .hashtag: return RegexParser.hashtagPattern
         case .url: return RegexParser.urlPattern
-        case .lookMore: return "阅读全文  "
+        case .lookMore: return "阅读全文    "
         case .custom(let regex): return regex
         }
     }
