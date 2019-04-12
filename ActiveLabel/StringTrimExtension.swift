@@ -51,7 +51,7 @@ extension NSMutableAttributedString {
         paragraphStyle.tailIndent = -0.0001
         payAttri.addAttributes([NSShadowAttributeName: shadow, NSStrokeWidthAttributeName: 1, NSStrokeColorAttributeName: UIColor.white, NSParagraphStyleAttributeName: paragraphStyle], range:range)
         */
-        payAttri.addAttributes([NSShadowAttributeName: shadow, NSStrokeWidthAttributeName: 1, NSStrokeColorAttributeName: UIColor.white], range:range)
+        payAttri.addAttributes([NSAttributedString.Key.shadow: shadow, NSAttributedString.Key.strokeWidth: 1, NSAttributedString.Key.strokeColor: UIColor.white], range:range)
         let attributeString = self
         attributeString.append(payAttri)
         return attributeString

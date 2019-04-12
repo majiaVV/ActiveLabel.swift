@@ -13,7 +13,7 @@ public protocol ActiveLabelDelegate: class {
     func didSelect(_ text: String, type: ActiveType)
 }
 
-public typealias ConfigureLinkAttribute = (ActiveType, [String : Any], Bool) -> ([String : Any])
+public typealias ConfigureLinkAttribute = (ActiveType, [NSAttributedString.Key : Any], Bool) -> ([NSAttributedString.Key : Any])
 typealias ElementTuple = (range: NSRange, element: ActiveElement, type: ActiveType)
 
 @IBDesignable open class ActiveLabel: UILabel {
@@ -69,7 +69,7 @@ typealias ElementTuple = (range: NSRange, element: ActiveElement, type: ActiveTy
     @IBInspectable public var highlightFontName: String? = nil {
         didSet { updateTextStorage(parseText: false) }
     }
-    @IBInspectable public var highlightFontSize: CGFloat? = nil {
+    public var highlightFontSize: CGFloat? = nil {
         didSet { updateTextStorage(parseText: false) }
     }
     
@@ -126,8 +126,8 @@ typealias ElementTuple = (range: NSRange, element: ActiveElement, type: ActiveTy
     }
     /// TS+ 补丁方法
     /// 调用attributedText-->updateTextStorage --> parseTextAndExtractActiveElements 把设置的Attributes设置无效，所以需要重新配置
-    open func fixAddAttributes(_ attrs: [NSAttributedStringKey : Any] = [:], range: NSRange) {
-        textStorage.addAttributes(attrs as [String : Any], range: range)
+    open func fixAddAttributes(_ attrs: [NSAttributedString.Key : Any] = [:], range: NSRange) {
+        textStorage.addAttributes(attrs as [NSAttributedString.Key : Any], range: range)
         setNeedsDisplay()
     }
     
@@ -345,8 +345,8 @@ typealias ElementTuple = (range: NSRange, element: ActiveElement, type: ActiveTy
         var range = NSRange(location: 0, length: 0)
         var attributes = mutAttrString.attributes(at: 0, effectiveRange: &range)
         
-        attributes[NSFontAttributeName] = font!
-        attributes[NSForegroundColorAttributeName] = textColor
+        attributes[NSAttributedString.Key.font] = font!
+        attributes[NSAttributedString.Key.foregroundColor] = textColor
         mutAttrString.addAttributes(attributes, range: range)
         let paragraphStyle = NSMutableParagraphStyle()
         paragraphStyle.lineBreakMode = NSLineBreakMode.byWordWrapping
@@ -364,21 +364,21 @@ typealias ElementTuple = (range: NSRange, element: ActiveElement, type: ActiveTy
         }
         paragraphStyle.headIndent = 0.0001
         paragraphStyle.tailIndent = -0.0001
-        attributes[NSParagraphStyleAttributeName] = paragraphStyle
-        attributes[NSForegroundColorAttributeName] = mentionColor
+        attributes[NSAttributedString.Key.paragraphStyle] = paragraphStyle
+        attributes[NSAttributedString.Key.foregroundColor] = mentionColor
         
         for (type, elements) in activeElements {
             
             switch type {
-            case .mention: attributes[NSForegroundColorAttributeName] = mentionColor
-            case .hashtag: attributes[NSForegroundColorAttributeName] = hashtagColor
-            case .url: attributes[NSForegroundColorAttributeName] = URLColor
-            case .lookMore: attributes[NSForegroundColorAttributeName] = URLColor
-            case .custom: attributes[NSForegroundColorAttributeName] = customColor[type] ?? defaultCustomColor
+            case .mention: attributes[NSAttributedString.Key.foregroundColor] = mentionColor
+            case .hashtag: attributes[NSAttributedString.Key.foregroundColor] = hashtagColor
+            case .url: attributes[NSAttributedString.Key.foregroundColor] = URLColor
+            case .custom: attributes[NSAttributedString.Key.foregroundColor] = customColor[type] ?? defaultCustomColor
+            case .lookMore: attributes[NSAttributedString.Key.foregroundColor] = URLColor
             }
             
             if let highlightFont = hightlightFont {
-                attributes[NSFontAttributeName] = highlightFont
+                attributes[NSAttributedString.Key.font] = highlightFont
             }
             
             if let configureLinkAttribute = configureLinkAttribute {
@@ -399,8 +399,7 @@ typealias ElementTuple = (range: NSRange, element: ActiveElement, type: ActiveTy
         
         // 如果可用事件中包含 url 事件
         if enabledTypes.contains(.url) {
-            // 创建 url 的响应事件
-            let tuple = ActiveBuilder.createURLElements(from: textString, range: textRange, maximumLenght: urlMaximumLength)
+            let tuple = ActiveBuilder.createURLElements(from: textString, range: textRange, maximumLength: urlMaximumLength)
             let urlElements = tuple.0
             let finalText = tuple.1
             textString = finalText
@@ -443,7 +442,7 @@ typealias ElementTuple = (range: NSRange, element: ActiveElement, type: ActiveTy
         var range = NSRange(location: 0, length: 0)
         var attributes = mutAttrString.attributes(at: 0, effectiveRange: nil)
         
-        let paragraphStyle = attributes[NSParagraphStyleAttributeName] as? NSMutableParagraphStyle ?? NSMutableParagraphStyle()
+        let paragraphStyle = attributes[NSAttributedString.Key.paragraphStyle] as? NSMutableParagraphStyle ?? NSMutableParagraphStyle()
         paragraphStyle.lineBreakMode = NSLineBreakMode.byWordWrapping
         if textAlignment != nil {
             paragraphStyle.alignment = textAlignment
@@ -460,7 +459,8 @@ typealias ElementTuple = (range: NSRange, element: ActiveElement, type: ActiveTy
         paragraphStyle.headIndent = 0.001
         paragraphStyle.tailIndent = -0.001
 //        paragraphStyle.minimumLineHeight = minimumLineHeight > 0 ? minimumLineHeight: self.font.pointSize * 1.14
-        attributes[NSParagraphStyleAttributeName] = paragraphStyle
+        attributes[NSAttributedString.Key.paragraphStyle] = paragraphStyle
+
         mutAttrString.setAttributes(attributes, range: range)
         
         return mutAttrString
@@ -486,7 +486,7 @@ typealias ElementTuple = (range: NSRange, element: ActiveElement, type: ActiveTy
                 let possibleSelectedColor = customSelectedColor[selectedElement.type] ?? customColor[selectedElement.type]
                 selectedColor = possibleSelectedColor ?? defaultCustomColor
             }
-            attributes[NSForegroundColorAttributeName] = selectedColor
+            attributes[NSAttributedString.Key.foregroundColor] = selectedColor
         } else {
             let unselectedColor: UIColor
             switch type {
@@ -496,7 +496,7 @@ typealias ElementTuple = (range: NSRange, element: ActiveElement, type: ActiveTy
             case .lookMore: unselectedColor = URLColor
             case .custom: unselectedColor = customColor[selectedElement.type] ?? defaultCustomColor
             }
-            attributes[NSForegroundColorAttributeName] = unselectedColor
+            attributes[NSAttributedString.Key.foregroundColor] = unselectedColor
         }
         let paragraphStyle = NSMutableParagraphStyle()
         paragraphStyle.lineBreakMode = NSLineBreakMode.byWordWrapping
@@ -514,9 +514,9 @@ typealias ElementTuple = (range: NSRange, element: ActiveElement, type: ActiveTy
         }
         paragraphStyle.headIndent = 0.0001
         paragraphStyle.tailIndent = -0.0001
-        attributes[NSParagraphStyleAttributeName] = paragraphStyle
+        attributes[NSAttributedString.Key.paragraphStyle] = paragraphStyle
         if let highlightFont = hightlightFont {
-            attributes[NSFontAttributeName] = highlightFont
+            attributes[NSAttributedString.Key.font] = highlightFont
         }
         
         if let configureLinkAttribute = configureLinkAttribute {
