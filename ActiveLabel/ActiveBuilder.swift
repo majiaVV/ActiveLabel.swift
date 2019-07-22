@@ -33,41 +33,39 @@ struct ActiveBuilder {
 
         var matchInfos: [(String, NSRange)] = []
         for match in matches where match.range.length > 2 {
-//<<<<<<< HEAD
-//            // url 字段
-//            let webString = nsstring.substring(with: match.range).trimmingCharacters(in: CharacterSet.whitespacesAndNewlines)
-//            matchInfos.append((webString, match.range))
-//        }
-//
-//        let trimmedWord = "网页链接"
-//        var oldRecord = 0
-//        var newRecord = 0
-//        for (webString, webRange) in matchInfos {
-//            // 计算 range
-//            let newRangeLocation = webRange.location - oldRecord + newRecord
-//            let newRangeLenth = (trimmedWord as NSString).length
-//            let newRange = NSRange(location: newRangeLocation, length: newRangeLenth)
-//            oldRecord += (webString as NSString).length
-//            newRecord += newRangeLenth
-//            // 设置 element
-//            let element = ActiveElement.url(original: webString, trimmed: trimmedWord)
-//            text = text.replacingOccurrences(of: webString, with: trimmedWord)
-//=======
-            let word = nsstring.substring(with: match.range)
-                .trimmingCharacters(in: CharacterSet.whitespacesAndNewlines)
-
-            guard let maxLength = maximumLength, word.count > maxLength else {
-                let range = maximumLength == nil ? match.range : (text as NSString).range(of: word)
-                let element = ActiveElement.create(with: type, text: word)
-                elements.append((range, element, type))
-                continue
-            }
-
-            let trimmedWord = word.trim(to: maxLength)
-            text = text.replacingOccurrences(of: word, with: trimmedWord)
-
-            let newRange = (text as NSString).range(of: trimmedWord)
-            let element = ActiveElement.url(original: word, trimmed: trimmedWord)
+            // url 字段
+            let webString = nsstring.substring(with: match.range).trimmingCharacters(in: CharacterSet.whitespacesAndNewlines)
+            matchInfos.append((webString, match.range))
+        }
+        
+        let trimmedWord = "网页链接"
+        var oldRecord = 0
+        var newRecord = 0
+        for (webString, webRange) in matchInfos {
+            // 计算 range
+            let newRangeLocation = webRange.location - oldRecord + newRecord
+            let newRangeLenth = (trimmedWord as NSString).length
+            let newRange = NSRange(location: newRangeLocation, length: newRangeLenth)
+            oldRecord += (webString as NSString).length
+            newRecord += newRangeLenth
+            // 设置 element
+            let element = ActiveElement.url(original: webString, trimmed: trimmedWord)
+            text = text.replacingOccurrences(of: webString, with: trimmedWord)
+            //            let word = nsstring.substring(with: match.range)
+            //                .trimmingCharacters(in: CharacterSet.whitespacesAndNewlines)
+            //
+            //            guard let maxLength = maximumLength, word.count > maxLength else {
+            //                let range = maximumLength == nil ? match.range : (text as NSString).range(of: word)
+            //                let element = ActiveElement.create(with: type, text: word)
+            //                elements.append((range, element, type))
+            //                continue
+            //            }
+            //
+            //            let trimmedWord = word.trim(to: maxLength)
+            //            text = text.replacingOccurrences(of: word, with: trimmedWord)
+            //
+            //            let newRange = (text as NSString).range(of: trimmedWord)
+            //            let element = ActiveElement.url(original: word, trimmed: trimmedWord)
             elements.append((newRange, element, type))
             
         }
